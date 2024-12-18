@@ -37,7 +37,7 @@ def get_engine_for_local_db(file_path):
     )
 
 # Especificar la ruta del archivo local
-local_file_path = "/workspaces/codespaces-blank/Chinook_Sqlite.sql"
+local_file_path = "Northwind.sql"
 
 # Crear el motor utilizando el archivo local
 engine = get_engine_for_local_db(local_file_path)
