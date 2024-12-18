@@ -13,6 +13,11 @@ from langchain import hub
 # Cargar variables desde el archivo .env
 load_dotenv()
 
+headers = {
+"authorization": st.secrets["auth_token"],
+"content-type": "application/json"
+}
+
 # Obtener la clave de la API de OpenAI desde las variables de entorno
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
