@@ -14,7 +14,7 @@ from langchain import hub
 load_dotenv()
 
 headers = {
-"authorization": st.secrets["auth_token"],
+"authorization": st.secrets["OPENAI_API_KEY"],
 "content-type": "application/json"
 }
 
