@@ -14,12 +14,12 @@ from langchain import hub
 load_dotenv()
 
 headers = {
-"authorization": st.secrets["OPENAI_API_KEY"],
+"authorization": st.secrets["auth_token"],
 "content-type": "application/json"
 }
 
 # Obtener la clave de la API de OpenAI desde las variables de entorno
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.getenv("auth_token")
 if not OPENAI_API_KEY:
     raise ValueError("La clave API de OpenAI no se encontró. Asegúrate de que esté configurada en el archivo .env.")
 

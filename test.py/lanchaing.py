@@ -13,7 +13,7 @@ from langgraph.prebuilt import create_react_agent
 load_dotenv()
 
 # Obtener la clave API de OpenAI desde las variables de entorno
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY = os.getenv("auth_token")
 if not OPENAI_API_KEY:
     raise ValueError("La clave API de OpenAI no se encontró. Asegúrate de que esté configurada en el archivo .env.")
 
