@@ -3,12 +3,20 @@ from sqlalchemy.pool import StaticPool
 from sqlalchemy import create_engine
 import sqlite3
 import os
-import getpass
+from dotenv import load_dotenv  # Para cargar variables desde .env
 from langchain_community.utilities.sql_database import SQLDatabase
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from langchain import hub
+
+# Cargar variables desde el archivo .env
+load_dotenv()
+
+# Obtener la clave de la API de OpenAI desde las variables de entorno
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("La clave API de OpenAI no se encontró. Asegúrate de que esté configurada en el archivo .env.")
 
 # Función para obtener el motor de la base de datos SQLite
 def get_engine_for_local_db(file_path):
@@ -38,17 +46,13 @@ def login():
 
 # Verificar si el usuario ha iniciado sesión
 if login():
-    # Cargar las variables de entorno para OpenAI API Key
-    if not os.environ.get("OPENAI_API_KEY"):
-        os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
-
     # Crear el motor y la base de datos SQL
     local_file_path = "/workspaces/codespaces-blank/Chinook_Sqlite.sql"
     engine = get_engine_for_local_db(local_file_path)
     db = SQLDatabase(engine)
 
     # Crear el modelo de lenguaje
-    llm = ChatOpenAI(model="gpt-4")
+    llm = ChatOpenAI(model="gpt-4", openai_api_key=OPENAI_API_KEY)
 
     # Configurar el toolkit SQL para interactuar con la base de datos
     toolkit = SQLDatabaseToolkit(db=db, llm=llm)

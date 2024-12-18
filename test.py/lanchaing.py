@@ -1,8 +1,23 @@
+import os
 import sqlite3
-from langchain_community.utilities.sql_database import SQLDatabase
+from dotenv import load_dotenv  # Para cargar variables de entorno desde .env
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
+from langchain_community.utilities.sql_database import SQLDatabase
+from langchain_openai import ChatOpenAI
+from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
+from langchain import hub
+from langgraph.prebuilt import create_react_agent
 
+# Cargar variables desde el archivo .env
+load_dotenv()
+
+# Obtener la clave API de OpenAI desde las variables de entorno
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("La clave API de OpenAI no se encontró. Asegúrate de que esté configurada en el archivo .env.")
+
+# Función para crear el motor SQLite en memoria
 def get_engine_for_local_db(file_path):
     """Leer archivo SQL local, poblar base de datos en memoria y crear el motor."""
     # Leer el contenido del archivo SQL local
@@ -30,41 +45,43 @@ engine = get_engine_for_local_db(local_file_path)
 # Crear instancia de SQLDatabase
 db = SQLDatabase(engine)
 
-import getpass
-import os
+# Crear el modelo de lenguaje
+llm = ChatOpenAI(model="gpt-4", openai_api_key=OPENAI_API_KEY)
 
-if not os.environ.get("OPENAI_API_KEY"):
-  os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: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")
-
-from langchain_openai import ChatOpenAI
-
-llm = ChatOpenAI(model="gpt-4o-mini")
-
-from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
-
+# Configurar el toolkit SQL para interactuar con la base de datos
 toolkit = SQLDatabaseToolkit(db=db, llm=llm)
-
 toolkit.get_tools()
 
-from langchain import hub
+# Crear un prompt personalizado
+custom_prompt = """
+Eres un asistente contable y financiero experto en SQL. Tienes amplios conocimientos sobre cómo interactuar con bases de datos relacionales y generar consultas SQL precisas y optimizadas. 
+Tu tarea es proporcionar análisis claros, consultas detalladas y respuestas útiles basadas en los datos proporcionados.
 
-prompt_template = hub.pull("langchain-ai/sql-agent-system-prompt")
+Al trabajar con la base de datos:
+1. Utiliza siempre un lenguaje claro y conciso para explicar tus consultas y respuestas.
+2. Si te piden realizar una consulta, estructura la consulta SQL y describe lo que hace antes de ejecutarla.
+3. Prioriza la precisión y el contexto en todas tus respuestas.
 
-assert len(prompt_template.messages) == 1
-print(prompt_template.input_variables)
-system_message = prompt_template.format(dialect="SQLite", top_k=5)
+Tienes acceso a una base de datos SQLite con el dialecto correspondiente.
+"""
 
-from langgraph.prebuilt import create_react_agent
+# Usar el prompt personalizado con el agente
+system_message = custom_prompt
 
+# Crear el agente con React
 agent_executor = create_react_agent(
     llm, toolkit.get_tools(), state_modifier=system_message
 )
 
-example_query = "lista los tres artistas con mas ventas"
+# Ejemplo de consulta
+example_query = "Lista los tres artistas con más ventas"
 
+# Ejecutar la consulta con el agente
 events = agent_executor.stream(
     {"messages": [("user", example_query)]},
     stream_mode="values",
 )
+
+# Mostrar los eventos resultantes
 for event in events:
     event["messages"][-1].pretty_print()
