@@ -39,14 +39,21 @@ def get_engine_for_local_db(file_path):
 # Función de inicio de sesión
 def login():
     st.sidebar.title("Inicio de sesión")
+    
+    # Campos de entrada
     username = st.sidebar.text_input("Usuario", "")
     password = st.sidebar.text_input("Contraseña", type="password")
     
-    if username == "admin" and password == "1234":
-        return True
-    elif username and password:
-        st.sidebar.error("Usuario o contraseña incorrectos.")
-        return False
+    # Botón de inicio de sesión
+    if st.sidebar.button("Iniciar sesión"):
+        if username == "admin" and password == "1234":
+            return True
+        elif username and password:
+            st.sidebar.error("Usuario o contraseña incorrectos.")
+            return False
+        else:
+            st.sidebar.error("Por favor, ingresa usuario y contraseña.")
+    
     return None
 
 # Verificar si el usuario ha iniciado sesión
