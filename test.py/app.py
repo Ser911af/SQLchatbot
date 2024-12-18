@@ -52,7 +52,7 @@ def login():
 # Verificar si el usuario ha iniciado sesión
 if login():
     # Crear el motor y la base de datos SQL
-    local_file_path = "/workspaces/codespaces-blank/Chinook_Sqlite.sql"
+    local_file_path = "Northwind.sql"
     engine = get_engine_for_local_db(local_file_path)
     db = SQLDatabase(engine)
 
